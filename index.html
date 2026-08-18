@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>That One Security Person — Ally Troha</title>
+<meta name="description" content="Ally Troha — Cyber Defense &amp; Threat and Vulnerability Management. Notes from the SOC floor.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #EDEFEA;
+    --paper-dim: #E2E5DE;
+    --ink: #12161C;
+    --ink-soft: #454C56;
+    --panel: #12161C;
+    --panel-line: #2A313B;
+    --amber: #E08A2C;
+    --amber-dim: #C97A22;
+    --ok-green: #4C7A5E;
+    --rule: #C7CBC1;
+    --max: 1040px;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+
+  html{scroll-behavior:smooth;}
+
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Source Serif 4', Georgia, serif;
+    font-size:17px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; scroll-behavior:auto !important;}
+  }
+
+  a{color:inherit;}
+  a:focus-visible, button:focus-visible{outline:2px solid var(--amber); outline-offset:3px;}
+
+  .wrap{max-width:var(--max); margin:0 auto; padding:0 28px;}
+
+  h1,h2,h3, .display{
+    font-family:'Space Grotesk', sans-serif;
+    letter-spacing:-0.01em;
+  }
+
+  .mono{
+    font-family:'IBM Plex Mono', monospace;
+    letter-spacing:0.02em;
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    position:sticky; top:0; z-index:50;
+    background:rgba(237,239,234,0.92);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--rule);
+  }
+  .nav-row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 28px;
+    max-width:var(--max); margin:0 auto;
+  }
+  .brand{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600; font-size:15px;
+    text-decoration:none;
+    display:flex; align-items:center; gap:9px;
+  }
+  .brand .dot{
+    width:8px; height:8px; border-radius:50%;
+    background:var(--ok-green);
+    box-shadow:0 0 0 3px rgba(76,122,94,0.18);
+  }
+  nav ul{list-style:none; display:flex; gap:26px;}
+  nav a{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px; text-decoration:none;
+    color:var(--ink-soft);
+    text-transform:uppercase; letter-spacing:0.06em;
+    transition:color .15s;
+  }
+  nav a:hover{color:var(--amber-dim);}
+  .nav-toggle{display:none;}
+
+  @media (max-width:640px){
+    nav ul{gap:16px;}
+    nav a{font-size:11px;}
+  }
+
+  /* ---------- Hero: incident ticket ---------- */
+  .hero{padding:64px 0 40px;}
+  .ticket{
+    background:var(--panel);
+    color:#DDE2E8;
+    border-radius:3px;
+    overflow:hidden;
+    box-shadow:0 18px 40px -18px rgba(18,22,28,0.45);
+  }
+  .ticket-head{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:14px 22px;
+    border-bottom:1px solid var(--panel-line);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:#8B94A1;
+  }
+  .ticket-head .status{
+    color:var(--amber);
+    display:flex; align-items:center; gap:6px;
+  }
+  .ticket-head .status::before{
+    content:''; width:6px; height:6px; border-radius:50%;
+    background:var(--amber);
+    animation:pulse 2.2s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{opacity:1;} 50%{opacity:.35;}
+  }
+  .ticket-body{padding:40px 32px 36px;}
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px; color:var(--amber);
+    text-transform:uppercase; letter-spacing:0.1em;
+    margin-bottom:14px;
+  }
+  .hero h1{
+    font-size:clamp(34px, 6vw, 54px);
+    line-height:1.05;
+    font-weight:700;
+    color:#F4F5F2;
+  }
+  .hero h1 span{color:var(--amber);}
+  .hero .role{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:14px;
+    color:#9AA3AF;
+    margin-top:14px;
+  }
+  .hero p.summary{
+    margin-top:22px; max-width:560px;
+    color:#C6CBD3; font-size:17px;
+  }
+  .hero-actions{margin-top:30px; display:flex; gap:14px; flex-wrap:wrap;}
+  .btn{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px; text-transform:uppercase; letter-spacing:0.06em;
+    padding:12px 20px; text-decoration:none;
+    border-radius:2px; display:inline-block;
+    transition:transform .15s, background .15s, color .15s;
+    border:1px solid transparent;
+  }
+  .btn-primary{background:var(--amber); color:#181008;}
+  .btn-primary:hover{background:#F0A44A; transform:translateY(-1px);}
+  .btn-ghost{border-color:#3A424D; color:#DDE2E8;}
+  .btn-ghost:hover{border-color:var(--amber); color:var(--amber); transform:translateY(-1px);}
+
+  .ticket-tags{
+    display:flex; gap:8px; flex-wrap:wrap; margin-top:28px;
+  }
+  .tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px; padding:5px 10px;
+    border:1px solid var(--panel-line);
+    border-radius:20px; color:#9AA3AF;
+  }
+
+  /* ---------- Section shell ---------- */
+  section{padding:72px 0;}
+  .section-head{
+    display:flex; align-items:baseline; gap:14px;
+    margin-bottom:34px;
+    border-bottom:1px solid var(--rule);
+    padding-bottom:16px;
+  }
+  .section-head .num{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px; color:var(--amber-dim);
+  }
+  .section-head h2{
+    font-size:26px; font-weight:600;
+  }
+
+  /* ---------- About ---------- */
+  .about-grid{
+    display:grid; grid-template-columns:1.4fr 1fr; gap:48px;
+  }
+  .about-grid p{color:var(--ink-soft); margin-bottom:16px; max-width:60ch;}
+  .about-grid p strong{color:var(--ink);}
+  .facts{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    border-left:2px solid var(--amber);
+    padding-left:18px;
+  }
+  .facts dt{color:var(--ink-soft); text-transform:uppercase; font-size:11px; letter-spacing:0.06em; margin-top:16px;}
+  .facts dt:first-child{margin-top:0;}
+  .facts dd{color:var(--ink); margin-top:3px;}
+
+  @media (max-width:760px){
+    .about-grid{grid-template-columns:1fr;}
+  }
+
+  /* ---------- Experience: incident log ---------- */
+  .log{border-top:1px solid var(--rule);}
+  .log-entry{
+    display:grid; grid-template-columns:120px 1fr;
+    gap:24px;
+    padding:28px 0;
+    border-bottom:1px solid var(--rule);
+  }
+  .log-entry .ts{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px; color:var(--amber-dim);
+    padding-top:4px;
+  }
+  .log-entry h3{font-size:19px; font-weight:600;}
+  .log-entry .org{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px; color:var(--ink-soft);
+    margin-top:2px; margin-bottom:12px;
+  }
+  .log-entry p{color:var(--ink-soft); max-width:64ch;}
+  .log-entry .quote{
+    margin-top:14px; padding:14px 16px;
+    background:var(--paper-dim); border-left:2px solid var(--amber);
+    font-style:italic; color:var(--ink); font-size:15.5px;
+  }
+  @media (max-width:600px){
+    .log-entry{grid-template-columns:1fr; gap:6px;}
+  }
+
+  /* ---------- Toolkit ---------- */
+  .toolkit-grid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr));
+    gap:12px;
+  }
+  .tool-tile{
+    background:var(--panel); color:#DDE2E8;
+    padding:16px 16px 14px;
+    border-radius:3px;
+  }
+  .tool-tile .name{font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:14.5px;}
+  .tool-tile .cat{
+    font-family:'IBM Plex Mono', monospace; font-size:10.5px;
+    color:var(--amber); text-transform:uppercase; letter-spacing:0.06em;
+    margin-top:6px;
+  }
+
+  /* ---------- Speaking / community ---------- */
+  .speaking-grid{
+    display:grid; grid-template-columns:repeat(2, 1fr); gap:24px; max-width:560px;
+  }
+  .stat{
+    padding:22px 20px;
+    border:1px solid var(--rule);
+    border-top:3px solid var(--amber);
+  }
+  .stat .n{font-family:'Space Grotesk',sans-serif; font-size:32px; font-weight:700;}
+  .stat .l{font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink-soft); margin-top:6px;}
+  @media (max-width:700px){
+    .speaking-grid{grid-template-columns:1fr;}
+  }
+
+  /* ---------- Contact / footer ---------- */
+  footer{
+    background:var(--panel); color:#C6CBD3;
+    padding:64px 0 40px;
+  }
+  footer h2{color:#F4F5F2; font-size:28px; margin-bottom:14px;}
+  footer p{color:#9AA3AF; max-width:52ch; margin-bottom:28px;}
+  .contact-links{display:flex; gap:16px; flex-wrap:wrap; margin-bottom:48px;}
+  .foot-bottom{
+    border-top:1px solid var(--panel-line);
+    padding-top:22px;
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+    font-family:'IBM Plex Mono', monospace; font-size:11.5px; color:#6C7480;
+  }
+
+  ::selection{background:var(--amber); color:#181008;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav-row">
+    <a href="#" class="brand"><span class="dot"></span>THAT ONE SECURITY PERSON</a>
+    <nav>
+      <ul>
+        <li><a href="#about">About</a></li>
+        <li><a href="#log">Experience</a></li>
+        <li><a href="#toolkit">Toolkit</a></li>
+        <li><a href="#speaking">Speaking</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- ================= HERO ================= -->
+  <section class="hero">
+    <div class="wrap">
+      <div class="ticket">
+        <div class="ticket-head">
+          <span>TICKET #SOC-0001 · OPENED 2018</span>
+          <span class="status">OPEN TO OPPORTUNITIES</span>
+        </div>
+        <div class="ticket-body">
+          <div class="eyebrow">Cyber Defense · Threat &amp; Vulnerability Management</div>
+          <h1>Ally Troha —<br>that <span>one</span> security person.</h1>
+          <div class="role mono">Manager, Cyber Defense @ Netskope · Hanover Park, IL</div>
+          <p class="summary">The one who gets pulled into the room when something's on fire, and the one who was already tracking it before anyone asked. I build the processes, automation, and calm that turn a scaling SOC into a predictable one.</p>
+          <div class="hero-actions">
+            <a href="#contact" class="btn btn-primary">Get in touch</a>
+            <a href="#log" class="btn btn-ghost">See the case history</a>
+          </div>
+          <div class="ticket-tags">
+            <span class="tag">Vulnerability Management</span>
+            <span class="tag">SOC Automation</span>
+            <span class="tag">Threat Detection</span>
+            <span class="tag">AI Strategy (MBA in progress)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ABOUT ================= -->
+  <section id="about">
+    <div class="wrap">
+      <div class="section-head"><span class="num mono">01</span><h2>About</h2></div>
+      <div class="about-grid">
+        <div>
+          <p><strong>I fell into security operations and never really left the floor.</strong> Since 2018 I've worked across incident response, identity and access management, and vulnerability management — the unglamorous, constant work that keeps an enterprise from becoming a headline.</p>
+          <p>At Netskope, I helped take the Security Operations Center from a lean, three-person team stretched across every function to a group that automates the equivalent of an extra analyst's workload every week. Now my focus has shifted toward threat and vulnerability management — closing the gap between "we found it" and "we fixed it," at scale.</p>
+          <p>I'm currently finishing an MBA concentrated in AI strategy, which mostly means I spend evenings arguing with case studies about where AI actually earns its keep in a security program, and where it's just expensive theater.</p>
+        </div>
+        <dl class="facts">
+          <dt>Based</dt>
+          <dd>Hanover Park, IL</dd>
+          <dt>Current</dt>
+          <dd>Netskope — Cyber Defense / TVM</dd>
+          <dt>Previously</dt>
+          <dd>Mastercard</dd>
+          <dt>Education</dt>
+          <dd>Northern Kentucky University — Networking, Information Security &amp; Computer Forensics</dd>
+          <dt>Community</dt>
+          <dd>Founder, Women in CyberSecurity (WiCyS) St. Louis Metro — Sept 2022</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= EXPERIENCE / LOG ================= -->
+  <section id="log">
+    <div class="wrap">
+      <div class="section-head"><span class="num mono">02</span><h2>Case history</h2></div>
+      <div class="log">
+        <div class="log-entry">
+          <div class="ts mono">2018 —<br>PRESENT</div>
+          <div>
+            <h3>Netskope</h3>
+            <div class="org">Cyber Defense → Threat &amp; Vulnerability Management</div>
+            <p>Joined as the team was standing up an in-house SOC from scratch — onboarding tools, building triage processes, and covering 24/7 alerting with a handful of people. Since then, focus has moved into vulnerability management: closing the loop between detection and remediation across a fast-growing cloud security platform.</p>
+            <div class="quote">"We couldn't focus on one thing and then get to the other — we had to do everything at once."</div>
+          </div>
+        </div>
+        <div class="log-entry">
+          <div class="ts mono">EARLIER</div>
+          <div>
+            <h3>Mastercard</h3>
+            <div class="org">Security &amp; IT operations</div>
+            <p>Early experience across security operations and IT before moving into cloud-native SOC work.</p>
+          </div>
+        </div>
+        <div class="log-entry">
+          <div class="ts mono">2014 —<br>2018</div>
+          <div>
+            <h3>Northern Kentucky University</h3>
+            <div class="org">B.S., Computer Information Technology</div>
+            <p>Concentration in Networking, Information Security, and Computer Forensics.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TOOLKIT ================= -->
+  <section id="toolkit">
+    <div class="wrap">
+      <div class="section-head"><span class="num mono">03</span><h2>What's on the desk</h2></div>
+      <div class="toolkit-grid">
+        <div class="tool-tile"><div class="name">Tenable</div><div class="cat">Vuln Mgmt</div></div>
+        <div class="tool-tile"><div class="name">Censys</div><div class="cat">Attack Surface</div></div>
+        <div class="tool-tile"><div class="name">BigQuery</div><div class="cat">Data / Analytics</div></div>
+        <div class="tool-tile"><div class="name">Jira</div><div class="cat">Workflow</div></div>
+        <div class="tool-tile"><div class="name">Tines</div><div class="cat">Automation</div></div>
+        <div class="tool-tile"><div class="name">SkopeAI</div><div class="cat">UEBA</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SPEAKING ================= -->
+  <section id="speaking">
+    <div class="wrap">
+      <div class="section-head"><span class="num mono">04</span><h2>Speaking &amp; community</h2></div>
+      <p style="color:var(--ink-soft); max-width:64ch; margin-bottom:28px;">Founder, WiCyS St. Louis Metro chapter (Sept 2022) — built a local network for women in cybersecurity through mentorship, meetups, and conference visibility.</p>
+      <div class="speaking-grid">
+        <div class="stat"><div class="n">WiCyS</div><div class="l">ST. LOUIS METRO — FOUNDER, 2022</div></div>
+        <div class="stat"><div class="n">MBA</div><div class="l">AI STRATEGY, IN PROGRESS</div></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ================= CONTACT / FOOTER ================= -->
+<footer id="contact">
+  <div class="wrap">
+    <h2>Something on fire?</h2>
+    <p>Open to conversations about vulnerability management, SOC automation, and where AI actually belongs in a security program. Reach out.</p>
+    <div class="contact-links">
+      <a href="mailto:[email protected]" class="btn btn-primary">Email me</a>
+      <a href="https://www.linkedin.com/in/ally-troha/" class="btn btn-ghost" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="#" class="btn btn-ghost" target="_blank" rel="noopener">GitHub</a>
+    </div>
+    <div class="foot-bottom">
+      <span>© <span id="year"></span> Ally Troha</span>
+      <span>Site built for GitHub Pages — TICKET #SOC-0001 CLOSED: PENDING</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+
+</body>
+</html>
