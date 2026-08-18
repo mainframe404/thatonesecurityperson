@@ -1,0 +1,16 @@
+# security.txt — thatonesecurityperson.com
+# If you're reading this, you're already my kind of visitor.
+
+Contact: mailto: ally.troha@gmail.com
+Expires: 2027-08-18T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://thatonesecurityperson.com/.well-known/security.txt
+
+# STATUS: Currently monitoring. Always monitoring.
+#
+# Found something? I'd rather hear it from you directly than read
+# about it later. Email me — be clear, and I'll get back to you fast.
+#
+# No bug bounty program here — this is a personal site, not a product.
+# But I will genuinely thank you, credit you if you want it, and buy
+# you a coffee if we're ever in the same city.
